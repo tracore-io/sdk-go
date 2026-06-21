@@ -1,0 +1,9 @@
+# oapi-codegen configuration for the generated low-level client.
+# The generated file carries a DO NOT EDIT header, is committed, and is owned by
+# codegen — the hand-written ergonomic layer (package tracore) wraps it.
+# Input is the down-converted 3.0 spec (openapi.gen.yaml); see cmd/downconvert.
+package: generated
+output: internal/generated/client.gen.go
+generate:
+  models: true
+  client: true

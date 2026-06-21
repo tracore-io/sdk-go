@@ -1,0 +1,12 @@
+# The OpenAPI spec is fetched + sha256-verified from the public release by sync.yml
+# at regen time; it is never committed. A seed copy may exist locally for codegen.
+/openapi.yaml
+# Down-converted 3.0 build artifact produced by `go generate` (cmd/downconvert).
+/openapi.gen.yaml
+
+# Go build/test output
+/bin/
+*.out
+*.test
+
+.idea

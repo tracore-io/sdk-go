@@ -1,0 +1,147 @@
+name: Publish
+
+# Go has no package registry: "publishing" a module is pushing an immutable
+# vX.Y.Z git tag, after which proxy.golang.org / pkg.go.dev index it on first
+# fetch. This workflow turns version.go's Version const into that tag + a GitHub
+# Release. It is the Go analog of sdk-node's npm publish: gated, idempotent, and
+# never run without a reviewed merge (or a deliberate manual confirm).
+on:
+  push:
+    branches: [main]
+    paths:
+      - version.go
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: Type "publish" to confirm a real publish (tag + release)
+        required: true
+        default: ''
+
+# contents: write is needed to create the git tag + GitHub Release.
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Tag and release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Check publish enabled
+        id: enable
+        env:
+          PUBLISH_ENABLED: ${{ vars.PUBLISH_ENABLED }}
+        run: |
+          set -euo pipefail
+          # Master switch. Off => green no-op (no tag, no release).
+          if [ "$PUBLISH_ENABLED" = "true" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::publishing disabled (set repo variable PUBLISH_ENABLED=true once branch protection is in place)"
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+          cache: true
+
+      - name: Guardrails
+        env:
+          EVENT: ${{ github.event_name }}
+          CONFIRM: ${{ github.event.inputs.confirm }}
+          REF: ${{ github.ref }}
+        run: |
+          set -euo pipefail
+          # Deliberate confirm only for manual dispatch. On push:main the guard is
+          # branch protection (a reviewed merge) plus the idempotency check below.
+          if [ "$EVENT" = "workflow_dispatch" ] && [ "$CONFIRM" != "publish" ]; then
+            echo "::error::Refusing to publish: type 'publish' in the confirm input to proceed."
+            exit 1
+          fi
+          # Publish only from main or a release tag (vX.Y.Z).
+          case "$REF" in
+            refs/heads/main) ;;
+            refs/tags/v*) ;;
+            *)
+              echo "::error::Refusing to publish from '$REF'. Publish only from main or a vX.Y.Z release tag."
+              exit 1
+              ;;
+          esac
+          # Never publish a dirty tree.
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "::error::Working tree is dirty; refusing to publish."
+            git status --short
+            exit 1
+          fi
+
+      - name: Derive version
+        id: version
+        run: |
+          set -euo pipefail
+          VERSION="$(grep -E 'const Version = ' version.go | sed -E 's/.*"([0-9]+\.[0-9]+\.[0-9]+)".*/\1/')"
+          test -n "$VERSION" || { echo "Could not read Version from version.go"; exit 1; }
+          echo "tag=v${VERSION}" >> "$GITHUB_OUTPUT"
+
+      - name: Idempotency check
+        id: idem
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          set -euo pipefail
+          # Definitive gate (Go analog of api-release.yml's tag check): if the tag /
+          # release already exists, this is a no-op. So a no-version-bump merge does
+          # nothing and a version is never double-tagged.
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists; nothing to do (bump Version to publish)."
+            echo "should_publish=false" >> "$GITHUB_OUTPUT"
+          elif git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
+            echo "Tag $TAG already exists; nothing to do (bump Version to publish)."
+            echo "should_publish=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "No existing tag/release for $TAG; proceeding."
+            echo "should_publish=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Last line of defence before an immutable tag: the module must build, vet,
+      # and pass unit tests. A broken module fails here instead of being tagged.
+      - name: Verify module
+        if: steps.enable.outputs.enabled == 'true' && steps.idem.outputs.should_publish == 'true'
+        run: |
+          set -euo pipefail
+          go build ./...
+          go vet ./...
+          go test ./...
+
+      - name: Tag and GitHub Release
+        if: steps.enable.outputs.enabled == 'true' && steps.idem.outputs.should_publish == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          set -euo pipefail
+          # gh release create makes the tag vX.Y.Z AND the Release in one call (no
+          # separate tag push that could re-trigger a workflow). Idempotent by the
+          # gate above.
+          gh release create "$TAG" --title "$TAG" --generate-notes
+
+      - name: Warm the module proxy
+        if: steps.enable.outputs.enabled == 'true' && steps.idem.outputs.should_publish == 'true'
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          set -euo pipefail
+          # Best-effort: prompt proxy.golang.org to index the new version so
+          # `go get` and pkg.go.dev see it promptly. Non-fatal; the proxy also
+          # indexes lazily on the first real fetch.
+          MODULE="github.com/tracore-io/sdk-go"
+          curl -fsS "https://proxy.golang.org/${MODULE}/@v/${TAG}.info" \
+            || echo "::warning::proxy warm fetch failed; the module will be indexed on first 'go get'."

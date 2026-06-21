@@ -1,0 +1,78 @@
+name: CI
+
+# Gate every PR (and main pushes) on the checks publish relies on, so a broken
+# package is caught BEFORE merge, before publish ever tags it. Make "verify" a
+# required status check on main (branch protection). This is the Go analog of the
+# sdk-node package-verification gate: gofmt + vet + a real build of the module path
+# + the mock contract tests.
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: gofmt, vet, build, test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+          cache: true
+
+      # Node provides npx for the Prism mock used by the contract tests.
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: gofmt
+        run: |
+          set -euo pipefail
+          unformatted="$(gofmt -l .)"
+          if [ -n "$unformatted" ]; then
+            echo "::error::These files are not gofmt-clean:"
+            echo "$unformatted"
+            exit 1
+          fi
+
+      - name: go vet
+        run: go vet ./...
+
+      - name: Build
+        run: go build ./...
+
+      # Best-effort: fetch the pinned spec from the public release and start a Prism
+      # mock so the contract tests run against the real contract. If the spec is not
+      # reachable (bootstrap incomplete), the contract tests skip and the unit tests
+      # still run; CI stays green and self-contained.
+      - name: Start Prism mock (best-effort)
+        run: |
+          set -euo pipefail
+          API_VERSION="$(tr -d '[:space:]' < .api-version)"
+          URL="https://github.com/tracore-io/openapi/releases/download/api-v${API_VERSION}/openapi.yaml"
+          if curl -fsSL "$URL" -o openapi.yaml; then
+            npx -y @stoplight/prism-cli@5 mock openapi.yaml -p 4010 > prism.log 2>&1 &
+            for i in $(seq 1 30); do
+              if curl -fsS -o /dev/null http://127.0.0.1:4010/workspaces; then break; fi
+              sleep 1
+            done
+            echo "TRACORE_MOCK_URL=http://127.0.0.1:4010" >> "$GITHUB_ENV"
+          else
+            echo "::warning::Pinned spec api-v${API_VERSION} not reachable; contract tests will skip."
+          fi
+
+      - name: Test
+        run: go test ./...
