@@ -67,6 +67,10 @@ type (
 	ProviderKeyTestResponse   = generated.ProviderKeyTestResponse
 	UserPlanResponse          = generated.UserPlanResponse
 	DocumentExtractRequest    = generated.DocumentExtractRequest
+	ExtractAcceptedResponse   = generated.ExtractAcceptedResponse
+	ApiErrorCode              = generated.ApiErrorCode
+	WebhookEventType          = generated.WebhookEventType
+	WebhookPayload            = generated.WebhookPayload
 )
 
 // Run statuses. A run in Completed, Failed, or ValidationFailed is terminal.
