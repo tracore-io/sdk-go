@@ -59,8 +59,10 @@ func pollRun(ctx context.Context, c *Client, runID string, opts *PollOptions) (*
 		}
 	}
 
+	// Status 0 + a synthetic code: this is a client-side give-up, not an HTTP
+	// response the server sent. The run itself is still live.
 	return nil, &TracoreError{
-		Status:  408,
+		Code:    ErrCodePollingTimeout,
 		Message: fmt.Sprintf("polling timed out after %d attempts for run %s", maxAttempts, runID),
 	}
 }

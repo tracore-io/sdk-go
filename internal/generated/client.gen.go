@@ -22,6 +22,66 @@ const (
 	ApiKeyScopes apiKeyContextKey = "apiKey.Scopes"
 )
 
+// Defines values for ApiErrorCode.
+const (
+	ApiErrorCodeCheckoutMissingUser ApiErrorCode = "checkout_missing_user"
+	ApiErrorCodeEmailNotVerified    ApiErrorCode = "email_not_verified"
+	ApiErrorCodeForbiddenKey        ApiErrorCode = "forbidden_key"
+	ApiErrorCodeINTERNALERROR       ApiErrorCode = "INTERNAL_ERROR"
+	ApiErrorCodeInvalidModel        ApiErrorCode = "invalid_model"
+	ApiErrorCodeInvalidProvider     ApiErrorCode = "invalid_provider"
+	ApiErrorCodeInvalidSignature    ApiErrorCode = "invalid_signature"
+	ApiErrorCodeNOTFOUND            ApiErrorCode = "NOT_FOUND"
+	ApiErrorCodeNoKey               ApiErrorCode = "no_key"
+	ApiErrorCodeNoStripeCustomer    ApiErrorCode = "no_stripe_customer"
+	ApiErrorCodeNotImplemented      ApiErrorCode = "not_implemented"
+	ApiErrorCodePlanLimitExceeded   ApiErrorCode = "plan_limit_exceeded"
+	ApiErrorCodeRateLimited         ApiErrorCode = "rate_limited"
+	ApiErrorCodeStripeNotConfigured ApiErrorCode = "stripe_not_configured"
+	ApiErrorCodeUNAUTHORIZED        ApiErrorCode = "UNAUTHORIZED"
+	ApiErrorCodeVALIDATIONERROR     ApiErrorCode = "VALIDATION_ERROR"
+)
+
+// Valid indicates whether the value is a known member of the ApiErrorCode enum.
+func (e ApiErrorCode) Valid() bool {
+	switch e {
+	case ApiErrorCodeCheckoutMissingUser:
+		return true
+	case ApiErrorCodeEmailNotVerified:
+		return true
+	case ApiErrorCodeForbiddenKey:
+		return true
+	case ApiErrorCodeINTERNALERROR:
+		return true
+	case ApiErrorCodeInvalidModel:
+		return true
+	case ApiErrorCodeInvalidProvider:
+		return true
+	case ApiErrorCodeInvalidSignature:
+		return true
+	case ApiErrorCodeNOTFOUND:
+		return true
+	case ApiErrorCodeNoKey:
+		return true
+	case ApiErrorCodeNoStripeCustomer:
+		return true
+	case ApiErrorCodeNotImplemented:
+		return true
+	case ApiErrorCodePlanLimitExceeded:
+		return true
+	case ApiErrorCodeRateLimited:
+		return true
+	case ApiErrorCodeStripeNotConfigured:
+		return true
+	case ApiErrorCodeUNAUTHORIZED:
+		return true
+	case ApiErrorCodeVALIDATIONERROR:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for CreateWebhookRequestEvents.
 const (
 	CreateWebhookRequestEventsDocumentReceived CreateWebhookRequestEvents = "document.received"
@@ -138,16 +198,16 @@ func (e ExtractAcceptedResponseStatus) Valid() bool {
 
 // Defines values for KeySource.
 const (
-	System KeySource = "system"
-	User   KeySource = "user"
+	KeySourceSystem KeySource = "system"
+	KeySourceUser   KeySource = "user"
 )
 
 // Valid indicates whether the value is a known member of the KeySource enum.
 func (e KeySource) Valid() bool {
 	switch e {
-	case System:
+	case KeySourceSystem:
 		return true
-	case User:
+	case KeySourceUser:
 		return true
 	default:
 		return false
@@ -493,6 +553,30 @@ func (e WebhookEndpointEvents) Valid() bool {
 	}
 }
 
+// Defines values for WebhookEventType.
+const (
+	DocumentReceived WebhookEventType = "document.received"
+	RunCompleted     WebhookEventType = "run.completed"
+	RunFailed        WebhookEventType = "run.failed"
+	RunProcessing    WebhookEventType = "run.processing"
+)
+
+// Valid indicates whether the value is a known member of the WebhookEventType enum.
+func (e WebhookEventType) Valid() bool {
+	switch e {
+	case DocumentReceived:
+		return true
+	case RunCompleted:
+		return true
+	case RunFailed:
+		return true
+	case RunProcessing:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for WebhookReceivedResponseReceived.
 const (
 	True WebhookReceivedResponseReceived = true
@@ -676,6 +760,20 @@ func (e CreateWebhookParamsEnv) Valid() bool {
 	}
 }
 
+// ApiErrorCode Known top-level `error.code` vocabulary emitted by the API. Deliberately NOT wired into `ErrorResponse.error.code` (which stays free-form for forward compatibility) — this standalone enum exists so generated SDKs carry the constants and consumers never restate them by hand. SDKs additionally synthesize client-side codes for failures that never reached the API: `transport_error` (network/decoding failure) and `config_error` (invalid client-side input). Notes: `stripe_not_configured`, `no_stripe_customer`, `email_not_verified`, and `checkout_missing_user` surface only on internal billing endpoints; `invalid_signature` only on the Stripe-facing `/billing/webhook`. `invalid_key` is NOT a top-level code — key-validation failures arrive as `VALIDATION_ERROR` with `details.code = "invalid_key"`.
+type ApiErrorCode string
+
+// AuthSession defines model for AuthSession.
+type AuthSession struct {
+	Session struct {
+		ExpiresAt time.Time `json:"expiresAt"`
+		Id        string    `json:"id"`
+		Token     string    `json:"token"`
+		UserId    string    `json:"userId"`
+	} `json:"session"`
+	User User `json:"user"`
+}
+
 // CheckoutSessionResponse defines model for CheckoutSessionResponse.
 type CheckoutSessionResponse struct {
 	// CheckoutUrl Stripe-hosted Checkout Session URL the client should redirect to.
@@ -786,7 +884,7 @@ type EnvironmentWithResolvedSlug string
 // ErrorResponse defines model for ErrorResponse.
 type ErrorResponse struct {
 	Error struct {
-		// Code Application error code. Known values include: `invalid_key`, `invalid_provider`, `invalid_model`, `forbidden_key`, `no_key`, `rate_limited`, `plan_limit_exceeded` (see `PlanLimitExceededResponse` for the discriminated wire body), `NOT_FOUND`, `VALIDATION_ERROR`, `UNAUTHORIZED`, `INTERNAL_ERROR`. Kept as a free-form string for forward compatibility.
+		// Code Application error code. The known vocabulary is enumerated in the standalone `ApiErrorCode` schema (exported into generated SDK types); this field stays a free-form string so new codes are not a breaking change. `plan_limit_exceeded` uses the discriminated wire body in `PlanLimitExceededResponse`.
 		Code    *string                 `json:"code,omitempty"`
 		Details *map[string]interface{} `json:"details,omitempty"`
 		Message string                  `json:"message"`
@@ -845,13 +943,13 @@ type PlanLimitExceededResponse struct {
 		Code PlanLimitExceededResponseErrorCode `json:"code"`
 
 		// CurrentValue Caller's current value against that limit at the time of the failure.
-		CurrentValue float32 `json:"currentValue"`
+		CurrentValue float64 `json:"currentValue"`
 
 		// Limit Discriminator for which limit was hit.
 		Limit PlanLimitExceededResponseErrorLimit `json:"limit"`
 
 		// LimitValue Hard limit configured for the caller's plan.
-		LimitValue float32 `json:"limitValue"`
+		LimitValue float64 `json:"limitValue"`
 		Message    string  `json:"message"`
 
 		// Meta Optional context bag (e.g. `requestedEnv`, `allowed`).
@@ -955,7 +1053,7 @@ type ResolvedModel struct {
 
 // Run defines model for Run.
 type Run struct {
-	Confidence    *float32  `json:"confidence,omitempty"`
+	Confidence    *float64  `json:"confidence,omitempty"`
 	CreatedAt     time.Time `json:"createdAt"`
 	DocumentId    string    `json:"documentId"`
 	EnvironmentId string    `json:"environmentId"`
@@ -1100,6 +1198,14 @@ type UpdateWorkspaceRequest struct {
 	Name        *string `json:"name,omitempty"`
 }
 
+// User defines model for User.
+type User struct {
+	Email openapi_types.Email `json:"email"`
+	Id    string              `json:"id"`
+	Image *string             `json:"image,omitempty"`
+	Name  string              `json:"name"`
+}
+
 // UserPlanResponse Caller's current plan tier, hard limits, usage counters within the active anniversary window, and the window itself. See spec §5.1.
 type UserPlanResponse struct {
 	Limits struct {
@@ -1112,7 +1218,7 @@ type UserPlanResponse struct {
 		// MaxExtractionsPerMonth Extraction-count quota per anniversary window. Numeric on both plans today (free=50, pro=1000); `null` is reserved for a future unlimited tier.
 		MaxExtractionsPerMonth *int `json:"maxExtractionsPerMonth"`
 
-		// MaxPagesPerMonth Page quota per anniversary window. Numeric on both plans today (free=50, pro=2000); `null` is reserved for a future unlimited tier.
+		// MaxPagesPerMonth Page quota per anniversary window. Numeric on both plans today (free=100, pro=2000); `null` is reserved for a future unlimited tier.
 		MaxPagesPerMonth *int `json:"maxPagesPerMonth"`
 
 		// MaxSchemas Maximum schema families the user can create. `null` = unlimited.
@@ -1171,13 +1277,47 @@ type WebhookEndpoint struct {
 	Id             string                  `json:"id"`
 	IsActive       bool                    `json:"isActive"`
 	SchemaFamilyId string                  `json:"schemaFamilyId"`
-	Secret         string                  `json:"secret"`
-	UpdatedAt      time.Time               `json:"updatedAt"`
-	Url            string                  `json:"url"`
+
+	// Secret HMAC-SHA256 signing secret for this endpoint. Returned on create AND on every subsequent read of the endpoint (it is retrievable, not shown-once), so it can be re-fetched after rotation of your own storage.
+	Secret    string    `json:"secret"`
+	UpdatedAt time.Time `json:"updatedAt"`
+	Url       string    `json:"url"`
 }
 
 // WebhookEndpointEvents defines model for WebhookEndpoint.Events.
 type WebhookEndpointEvents string
+
+// WebhookEventType Event types a webhook endpoint can subscribe to.
+type WebhookEventType string
+
+// WebhookPayload Wire body of every webhook delivery (outbound POST from Tracore to a subscribed endpoint; not a REST response). Flat camelCase object — there is no nested `data` envelope beyond the `data` field below. Deliveries carry the headers `X-Webhook-Event` (the event type) and `X-Webhook-Signature` (`sha256=<hex HMAC-SHA256(secret, raw body)>`). Consumers should route by `event`; note `run.failed` deliveries always carry `status: "failed"` even when the run's terminal status in the API is `validation_failed`.
+type WebhookPayload struct {
+	// Confidence Extraction confidence. Present on `run.completed` only.
+	Confidence *float64 `json:"confidence,omitempty"`
+
+	// Data Extracted data. Present on `run.completed` only.
+	Data       *map[string]interface{} `json:"data,omitempty"`
+	DocumentId string                  `json:"documentId"`
+
+	// DocumentName Document display name. Present on `document.received` only.
+	DocumentName *string `json:"documentName,omitempty"`
+
+	// EnvironmentId Environment id (not slug).
+	EnvironmentId string `json:"environmentId"`
+
+	// ErrorMessage Failure description. Present on `run.failed` only.
+	ErrorMessage *string `json:"errorMessage,omitempty"`
+
+	// Event Event types a webhook endpoint can subscribe to.
+	Event WebhookEventType `json:"event"`
+
+	// RunId Run id. Empty string for `document.received` (no run exists yet).
+	RunId string `json:"runId"`
+
+	// Status Delivery-time status literal — `received` (document.received), `processing` (run.processing), `completed` (run.completed) or `failed` (run.failed, uninformative; route by `event`).
+	Status    string    `json:"status"`
+	Timestamp time.Time `json:"timestamp"`
+}
 
 // WebhookReceivedResponse defines model for WebhookReceivedResponse.
 type WebhookReceivedResponse struct {
@@ -1243,6 +1383,9 @@ type NotImplemented = ErrorResponse
 
 // PlanLimitExceeded 403 wire body emitted whenever a plan-enforcement check fails. The `error.limit` discriminator drives the paywall modal copy on the web client (spec §5.2 / §6.4). `windowStart` and `windowEnd` are present only for the `max_pages_per_month` discriminator.
 type PlanLimitExceeded = PlanLimitExceededResponse
+
+// PreconditionFailed defines model for PreconditionFailed.
+type PreconditionFailed = ErrorResponse
 
 // TooManyRequests defines model for TooManyRequests.
 type TooManyRequests = ErrorResponse

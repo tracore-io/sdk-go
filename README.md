@@ -1,7 +1,7 @@
 # sdk-go
 
 <!-- tracore-api-version:start -->
-> Built against Tracore API v0.5.0.
+> Built against Tracore API v0.6.0.
 <!-- tracore-api-version:end -->
 
 Official Go SDK for the [Tracore API](https://tracore.io) — schema-driven document-to-JSON extraction.
@@ -85,6 +85,24 @@ func main() {
 - `client.Environments` — manage environments
 - `client.User.ProviderKeys` — manage the user's AI provider keys (BYOK)
 - `client.Extract(...)` — one-call extract (by document ID or inline upload), with optional polling
+- `client.ExtractAsync(...)` — fire-and-forget extract returning the 202 accepted envelope (`runId`, `pending`)
+
+Note that `Extract` is not idempotent across retries: it issues a billed POST plus
+at least one follow-up GET, so retrying the whole call can start a second billed
+run. Webhook-driven consumers should use `ExtractAsync` — it performs the single
+POST and returns the accepted envelope as-is, so the run id is never lost to a
+failed follow-up request:
+
+```go
+accepted, err := client.ExtractAsync(ctx, ws.Slug, "invoice",
+	tracore.ExtractInput{DocumentID: docID}, nil)
+if err != nil {
+	// Status != 0: the API rejected the request, no run exists — safe to retry.
+	// Status == 0 (ErrCodeTransport): outcome unknown — the connection may have
+	// dropped after the server accepted; retry only if a duplicate run is acceptable.
+}
+store(accepted.RunId) // the run.completed webhook will quote this id
+```
 
 ## Error handling
 
@@ -96,11 +114,21 @@ ws, err := client.Workspaces.Get(ctx, "nonexistent")
 if err != nil {
 	if te, ok := tracore.AsTracoreError(err); ok {
 		fmt.Println(te.Status)  // 404
-		fmt.Println(te.Code)    // "NOT_FOUND"
+		fmt.Println(te.Code)    // tracore.ErrCodeNotFound
 		fmt.Println(te.Message) // "Workspace not found"
 	}
 }
 ```
+
+Error codes are exported as constants — the client-side synthetic codes
+(`tracore.ErrCodeTransport` for network/decoding failures with `Status == 0`,
+`tracore.ErrCodeConfig` for invalid client-side input, `tracore.ErrCodePollingTimeout`
+for an exhausted poll loop) plus the server's `error.code` vocabulary
+(`tracore.ErrCodeNotFound`, `tracore.ErrCodePlanLimitExceeded`, ...). Transport
+failures keep their underlying
+cause reachable through `errors.Is`/`errors.As` (`Unwrap`), so checks like
+`errors.Is(err, context.Canceled)` or `net.Error` timeout detection work through
+the SDK wrapper.
 
 ## Versioning
 

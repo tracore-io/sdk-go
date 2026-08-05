@@ -6,10 +6,49 @@ import (
 	"fmt"
 )
 
+// Synthetic client-side error codes. Set on TracoreError.Code for failures that
+// never produced an HTTP response, so retry/breaker layers can classify without
+// restating string literals.
+const (
+	// ErrCodeTransport marks a network, timeout, or encoding failure (retryable).
+	ErrCodeTransport = "transport_error"
+	// ErrCodeConfig marks invalid client-side input (permanent; a caller bug).
+	ErrCodeConfig = "config_error"
+	// ErrCodePollingTimeout marks a poll loop that exhausted MaxAttempts without
+	// the run reaching a terminal status. The run is still live server-side.
+	ErrCodePollingTimeout = "polling_timeout"
+)
+
+// Server-side `error.code` vocabulary, mirroring the contract's ApiErrorCode
+// schema. The wire field stays a free-form string — new codes are not a breaking
+// change — so match on these constants rather than an exhaustive switch.
+// Note: key-validation failures arrive as ErrCodeValidation with
+// `Details["code"] == "invalid_key"`, not as a top-level code. The last five
+// constants surface only on internal billing surfaces and the Stripe webhook,
+// never on public API endpoints.
+const (
+	ErrCodeNotFound            = "NOT_FOUND"
+	ErrCodeValidation          = "VALIDATION_ERROR"
+	ErrCodeUnauthorized        = "UNAUTHORIZED"
+	ErrCodeInternal            = "INTERNAL_ERROR"
+	ErrCodePlanLimitExceeded   = "plan_limit_exceeded"
+	ErrCodeRateLimited         = "rate_limited"
+	ErrCodeForbiddenKey        = "forbidden_key"
+	ErrCodeInvalidProvider     = "invalid_provider"
+	ErrCodeInvalidModel        = "invalid_model"
+	ErrCodeNoKey               = "no_key"
+	ErrCodeNotImplemented      = "not_implemented"
+	ErrCodeEmailNotVerified    = "email_not_verified"
+	ErrCodeStripeNotConfigured = "stripe_not_configured"
+	ErrCodeNoStripeCustomer    = "no_stripe_customer"
+	ErrCodeCheckoutMissingUser = "checkout_missing_user"
+	ErrCodeInvalidSignature    = "invalid_signature"
+)
+
 // TracoreError is returned by every SDK call that fails. For HTTP failures Status
 // is the response status code and Code/Message/Details come from the API's
 // `{ "error": { code, message, details } }` envelope. For client-side failures
-// (transport, encoding) Status is 0 and Code is "transport_error".
+// (transport, encoding) Status is 0 and Code is ErrCodeTransport.
 type TracoreError struct {
 	// Status is the HTTP status code, or 0 for a client-side failure.
 	Status int
@@ -19,6 +58,11 @@ type TracoreError struct {
 	Message string
 	// Details carries additional structured error context, when provided.
 	Details map[string]interface{}
+
+	// cause is the underlying error for client-side failures, reachable via
+	// Unwrap so errors.Is/As see through the SDK wrapper (context.Canceled,
+	// net.Error timeouts, caller sentinels round-tripping the transport).
+	cause error
 }
 
 func (e *TracoreError) Error() string {
@@ -26,6 +70,12 @@ func (e *TracoreError) Error() string {
 		return fmt.Sprintf("tracore: %s (status %d, code %q)", e.Message, e.Status, e.Code)
 	}
 	return fmt.Sprintf("tracore: %s (status %d)", e.Message, e.Status)
+}
+
+// Unwrap returns the underlying cause (nil for pure HTTP envelope errors), making
+// the wrapper transparent to errors.Is and errors.As.
+func (e *TracoreError) Unwrap() error {
+	return e.cause
 }
 
 // AsTracoreError unwraps err into a *TracoreError if it is one. It is a thin
@@ -62,9 +112,10 @@ func normalizeError(status int, body []byte) *TracoreError {
 	return &TracoreError{Status: status, Message: fmt.Sprintf("request failed with status %d", status)}
 }
 
-// transportError wraps a client-side (non-HTTP) failure.
+// transportError wraps a client-side (non-HTTP) failure, keeping the original
+// error reachable via Unwrap.
 func transportError(err error) *TracoreError {
-	return &TracoreError{Code: "transport_error", Message: err.Error()}
+	return &TracoreError{Code: ErrCodeTransport, Message: err.Error(), cause: err}
 }
 
 // decode resolves an oapi-codegen response into either the typed success payload

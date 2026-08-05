@@ -66,7 +66,7 @@ type Client struct {
 // network call is made here.
 func New(opts ClientOptions) (*Client, error) {
 	if opts.APIKey == "" {
-		return nil, &TracoreError{Code: "config_error", Message: "APIKey is required"}
+		return nil, &TracoreError{Code: ErrCodeConfig, Message: "APIKey is required"}
 	}
 	baseURL := opts.BaseURL
 	if baseURL == "" {
@@ -154,14 +154,56 @@ type ExtractOptions struct {
 // Extract triggers an extraction run and, when ExtractOptions.Poll is set, waits
 // for it to complete. It is a convenience over Documents.Upload + the schema
 // extract endpoint + Runs.Poll.
+//
+// Extract is NOT idempotent across retries: it issues a billed POST and then at
+// least one follow-up GET, so retrying the whole call after a failure can start a
+// second billed run even though the first one is live. Webhook-driven consumers
+// that only need the run id should use ExtractAsync, which performs the single
+// POST and returns the accepted envelope as-is.
 func (c *Client) Extract(ctx context.Context, workspace, schemaKey string, input ExtractInput, opts *ExtractOptions) (*Run, error) {
 	var o ExtractOptions
 	if opts != nil {
 		o = *opts
 	}
+
+	accepted, err := c.startExtract(ctx, workspace, schemaKey, input, o)
+	if err != nil {
+		return nil, err
+	}
+
+	if o.Poll {
+		return pollRun(ctx, c, accepted.RunId, o.PollOptions)
+	}
+	res, err := c.gen.GetRunByIdWithResponse(ctx, accepted.RunId)
+	if err != nil {
+		return nil, transportError(err)
+	}
+	return decode(res.JSON200, res.StatusCode(), res.Body)
+}
+
+// ExtractAsync triggers an extraction run and returns the API's 202 accepted
+// envelope (run id + `pending` status) without any follow-up request. This is the
+// fire-and-forget variant for webhook-driven consumers: the run id is never lost
+// to a failed follow-up GET. Error semantics: a *TracoreError with Status != 0
+// means the API rejected the request and no run exists; a transport error
+// (Status 0, ErrCodeTransport) is ambiguous — in the narrow window where the
+// connection drops after the server responded, a billed run may already be live,
+// so treat transport errors as "unknown outcome" (as with any HTTP client) and
+// retry only if a duplicate run is acceptable. ExtractOptions.Poll and
+// PollOptions are ignored.
+func (c *Client) ExtractAsync(ctx context.Context, workspace, schemaKey string, input ExtractInput, opts *ExtractOptions) (*ExtractAcceptedResponse, error) {
+	var o ExtractOptions
+	if opts != nil {
+		o = *opts
+	}
+	return c.startExtract(ctx, workspace, schemaKey, input, o)
+}
+
+// startExtract performs the single extract POST (by document id or inline upload)
+// and returns the 202 accepted envelope.
+func (c *Client) startExtract(ctx context.Context, workspace, schemaKey string, input ExtractInput, o ExtractOptions) (*generated.ExtractAcceptedResponse, error) {
 	env := c.resolveEnv(o.Env)
 
-	var runID string
 	switch {
 	case input.DocumentID != "":
 		body := generated.DocumentExtractRequest{}
@@ -176,11 +218,7 @@ func (c *Client) Extract(ctx context.Context, workspace, schemaKey string, input
 		if err != nil {
 			return nil, transportError(err)
 		}
-		accepted, derr := decode(res.JSON202, res.StatusCode(), res.Body)
-		if derr != nil {
-			return nil, derr
-		}
-		runID = accepted.RunId
+		return decode(res.JSON202, res.StatusCode(), res.Body)
 	case input.File != nil && input.FileName != "":
 		fields := map[string]string{}
 		if o.VersionNumber != 0 {
@@ -198,23 +236,10 @@ func (c *Client) Extract(ctx context.Context, workspace, schemaKey string, input
 		if err != nil {
 			return nil, transportError(err)
 		}
-		accepted, derr := decode(res.JSON202, res.StatusCode(), res.Body)
-		if derr != nil {
-			return nil, derr
-		}
-		runID = accepted.RunId
+		return decode(res.JSON202, res.StatusCode(), res.Body)
 	default:
-		return nil, &TracoreError{Code: "config_error", Message: "Extract requires either DocumentID or File+FileName"}
+		return nil, &TracoreError{Code: ErrCodeConfig, Message: "Extract requires either DocumentID or File+FileName"}
 	}
-
-	if o.Poll {
-		return pollRun(ctx, c, runID, o.PollOptions)
-	}
-	res, err := c.gen.GetRunByIdWithResponse(ctx, runID)
-	if err != nil {
-		return nil, transportError(err)
-	}
-	return decode(res.JSON200, res.StatusCode(), res.Body)
 }
 
 // multipartBody builds a multipart/form-data body with a single "file" part plus

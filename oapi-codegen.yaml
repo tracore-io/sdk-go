@@ -7,3 +7,7 @@ output: internal/generated/client.gen.go
 generate:
   models: true
   client: true
+output-options:
+  # The contract ships standalone schemas referenced by no operation (ApiErrorCode,
+  # WebhookPayload) precisely so SDKs export them; default pruning would drop them.
+  skip-prune: true
