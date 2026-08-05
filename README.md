@@ -1,7 +1,7 @@
 # sdk-go
 
 <!-- tracore-api-version:start -->
-> Built against Tracore API v0.5.0.
+> Built against Tracore API v0.6.0.
 <!-- tracore-api-version:end -->
 
 Official Go SDK for the [Tracore API](https://tracore.io) — schema-driven document-to-JSON extraction.

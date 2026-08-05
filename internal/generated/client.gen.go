@@ -786,7 +786,7 @@ type EnvironmentWithResolvedSlug string
 // ErrorResponse defines model for ErrorResponse.
 type ErrorResponse struct {
 	Error struct {
-		// Code Application error code. Known values include: `invalid_key`, `invalid_provider`, `invalid_model`, `forbidden_key`, `no_key`, `rate_limited`, `plan_limit_exceeded` (see `PlanLimitExceededResponse` for the discriminated wire body), `NOT_FOUND`, `VALIDATION_ERROR`, `UNAUTHORIZED`, `INTERNAL_ERROR`. Kept as a free-form string for forward compatibility.
+		// Code Application error code. The known vocabulary is enumerated in the standalone `ApiErrorCode` schema (exported into generated SDK types); this field stays a free-form string so new codes are not a breaking change. `plan_limit_exceeded` uses the discriminated wire body in `PlanLimitExceededResponse`.
 		Code    *string                 `json:"code,omitempty"`
 		Details *map[string]interface{} `json:"details,omitempty"`
 		Message string                  `json:"message"`
@@ -845,13 +845,13 @@ type PlanLimitExceededResponse struct {
 		Code PlanLimitExceededResponseErrorCode `json:"code"`
 
 		// CurrentValue Caller's current value against that limit at the time of the failure.
-		CurrentValue float32 `json:"currentValue"`
+		CurrentValue float64 `json:"currentValue"`
 
 		// Limit Discriminator for which limit was hit.
 		Limit PlanLimitExceededResponseErrorLimit `json:"limit"`
 
 		// LimitValue Hard limit configured for the caller's plan.
-		LimitValue float32 `json:"limitValue"`
+		LimitValue float64 `json:"limitValue"`
 		Message    string  `json:"message"`
 
 		// Meta Optional context bag (e.g. `requestedEnv`, `allowed`).
@@ -955,7 +955,7 @@ type ResolvedModel struct {
 
 // Run defines model for Run.
 type Run struct {
-	Confidence    *float32  `json:"confidence,omitempty"`
+	Confidence    *float64  `json:"confidence,omitempty"`
 	CreatedAt     time.Time `json:"createdAt"`
 	DocumentId    string    `json:"documentId"`
 	EnvironmentId string    `json:"environmentId"`
@@ -1112,7 +1112,7 @@ type UserPlanResponse struct {
 		// MaxExtractionsPerMonth Extraction-count quota per anniversary window. Numeric on both plans today (free=50, pro=1000); `null` is reserved for a future unlimited tier.
 		MaxExtractionsPerMonth *int `json:"maxExtractionsPerMonth"`
 
-		// MaxPagesPerMonth Page quota per anniversary window. Numeric on both plans today (free=50, pro=2000); `null` is reserved for a future unlimited tier.
+		// MaxPagesPerMonth Page quota per anniversary window. Numeric on both plans today (free=100, pro=2000); `null` is reserved for a future unlimited tier.
 		MaxPagesPerMonth *int `json:"maxPagesPerMonth"`
 
 		// MaxSchemas Maximum schema families the user can create. `null` = unlimited.
@@ -1171,9 +1171,11 @@ type WebhookEndpoint struct {
 	Id             string                  `json:"id"`
 	IsActive       bool                    `json:"isActive"`
 	SchemaFamilyId string                  `json:"schemaFamilyId"`
-	Secret         string                  `json:"secret"`
-	UpdatedAt      time.Time               `json:"updatedAt"`
-	Url            string                  `json:"url"`
+
+	// Secret HMAC-SHA256 signing secret for this endpoint. Returned on create AND on every subsequent read of the endpoint (it is retrievable, not shown-once), so it can be re-fetched after rotation of your own storage.
+	Secret    string    `json:"secret"`
+	UpdatedAt time.Time `json:"updatedAt"`
+	Url       string    `json:"url"`
 }
 
 // WebhookEndpointEvents defines model for WebhookEndpoint.Events.

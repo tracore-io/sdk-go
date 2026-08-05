@@ -1,0 +1,157 @@
+npm warn deprecated uuid@8.3.2: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
+npm warn deprecated json-schema-ref-parser@6.1.0: Please switch to @apidevtools/json-schema-ref-parser
+npm warn deprecated @faker-js/faker@5.5.3: Please update to a newer version.
+[5:44:45 PM] › [CLI] …  awaiting  Starting Prism…
+[5:44:45 PM] › [CLI] ℹ  info      GET        http://127.0.0.1:4010/health/live
+[5:44:45 PM] › [CLI] ℹ  info      GET        http://127.0.0.1:4010/health/ready
+[5:44:45 PM] › [CLI] ℹ  info      GET        http://127.0.0.1:4010/user/plan
+[5:44:45 PM] › [CLI] ℹ  info      GET        http://127.0.0.1:4010/user/subscription
+[5:44:45 PM] › [CLI] ℹ  info      GET        http://127.0.0.1:4010/user/provider-keys
+[5:44:45 PM] › [CLI] ℹ  info      GET        http://127.0.0.1:4010/user/provider-keys/google
+[5:44:45 PM] › [CLI] ℹ  info      PUT        http://127.0.0.1:4010/user/provider-keys/anthropic
+[5:44:45 PM] › [CLI] ℹ  info      DELETE     http://127.0.0.1:4010/user/provider-keys/openai
+[5:44:45 PM] › [CLI] ℹ  info      POST       http://127.0.0.1:4010/user/provider-keys/openai/test
+[5:44:45 PM] › [CLI] ℹ  info      POST       http://127.0.0.1:4010/billing/checkout
+[5:44:45 PM] › [CLI] ℹ  info      POST       http://127.0.0.1:4010/billing/portal
+[5:44:45 PM] › [CLI] ℹ  info      POST       http://127.0.0.1:4010/billing/webhook
+[5:44:45 PM] › [CLI] ℹ  info      GET        http://127.0.0.1:4010/workspaces?page=567&pageSize=77
+[5:44:45 PM] › [CLI] ℹ  info      POST       http://127.0.0.1:4010/workspaces
+[5:44:45 PM] › [CLI] ℹ  info      GET        http://127.0.0.1:4010/workspaces/t3oay3fmpspi2_-3w0mnsk7pu8p6dkc2ypnbont2z4an
+[5:44:45 PM] › [CLI] ℹ  info      PATCH      http://127.0.0.1:4010/workspaces/mg25cc4tgfgg9ytredqe
+[5:44:45 PM] › [CLI] ℹ  info      DELETE     http://127.0.0.1:4010/workspaces/z_t0chn89p4j05b0483k5wn
+[5:44:45 PM] › [CLI] ℹ  info      GET        http://127.0.0.1:4010/workspaces/57k_suff0hf31pkdbparqq_jrdpr9922q8r3h6t18n529g1opbquhp8/environments?page=277&pageSize=34
+[5:44:45 PM] › [CLI] ℹ  info      GET        http://127.0.0.1:4010/workspaces/nw9ipwdpveh_-6tvdhuvgpeureu0w_hx4h7rznzz5uuob2c91nl0--r/environments/staging
+[5:44:45 PM] › [CLI] ℹ  info      PATCH      http://127.0.0.1:4010/workspaces/2xda7dn__r77jqnua_gtqhtw794hbvt/environments/development
+[5:44:45 PM] › [CLI] ℹ  info      GET        http://127.0.0.1:4010/workspaces/oo3w6e7efydgv51752g_vgd1-0mqjf3xqx2cg9zi5n5/schemas?page=802&pageSize=84
+[5:44:45 PM] › [CLI] ℹ  info      POST       http://127.0.0.1:4010/workspaces/6v_czmgz5chinom1il-nb2/schemas
+[5:44:45 PM] › [CLI] ℹ  info      GET        http://127.0.0.1:4010/workspaces/fx1jw3jh8r6o1rjj752vx_t8xol/schemas/dut2kc-dljilu1v_wjoby0mh0hszaguowynryyc08mfu5xza0q
+[5:44:45 PM] › [CLI] ℹ  info      GET        http://127.0.0.1:4010/workspaces/p_s5jbq6ns49/schemas/x6ek7ndazjythzfxedwuxxcbk2ulu0z5df5a9he46bjvuv7hzzeh_ah5w1u09r8/versions?page=400&pageSize=51
+[5:44:45 PM] › [CLI] ℹ  info      GET        http://127.0.0.1:4010/workspaces/qnllln1wv6xrbr7omlbsr7tmct679q6-08a8osv9y8gl4/schemas/efpuwrp_rq/versions/811
+[5:44:45 PM] › [CLI] ℹ  info      GET        http://127.0.0.1:4010/workspaces/4pkdgko-cjy0ue2i6s-dxmjk/schemas/99wu6b8o04647ejr_k5yd/documents?env=staging&page=135&pageSize=61
+[5:44:45 PM] › [CLI] ℹ  info      POST       http://127.0.0.1:4010/workspaces/qb83yopqki36mmpg48dwnx5ukml01aow5ax8nlzzlxd7drpfp/schemas/uswjiwig94hsj8qstvkalw-23e9lnnt83v5d9ykxud7b0u0dci0cwc_5-a938tcf/documents?env=development
+[5:44:45 PM] › [CLI] ℹ  info      GET        http://127.0.0.1:4010/documents/eligendi
+[5:44:45 PM] › [CLI] ℹ  info      DELETE     http://127.0.0.1:4010/documents/porro
+[5:44:45 PM] › [CLI] ℹ  info      GET        http://127.0.0.1:4010/documents/qui/download
+[5:44:45 PM] › [CLI] ℹ  info      GET        http://127.0.0.1:4010/workspaces/5t_nq6o/schemas/ni688kajhqjg7qk1a1q2esx3cg-xhppp924158hn4o_4w5phi4t2jkjkb3u4ddgx/runs?env=staging&page=85&pageSize=29
+[5:44:45 PM] › [CLI] ℹ  info      GET        http://127.0.0.1:4010/runs/perspiciatis
+[5:44:45 PM] › [CLI] ℹ  info      POST       http://127.0.0.1:4010/workspaces/recwpn93no1/schemas/ijohnkg5n8_l_yk/documents/qui/extract?env=staging
+[5:44:45 PM] › [CLI] ℹ  info      POST       http://127.0.0.1:4010/workspaces/0lleaj_uznv_z276v1p-d1n/schemas/d9zmubz-52d6vzagy6o/extract?env=production
+[5:44:45 PM] › [CLI] ℹ  info      GET        http://127.0.0.1:4010/workspaces/cy_-cfar1o38h9uk/schemas/t530-3_geksdm0rcq12fy8b4f/webhooks?env=staging&page=277&pageSize=49
+[5:44:45 PM] › [CLI] ℹ  info      POST       http://127.0.0.1:4010/workspaces/3at_i-71m3jwkgvlu8elrw-68s/schemas/a9suqj0_dhss3bmgz31sq4wf8/webhooks?env=development
+[5:44:45 PM] › [CLI] ℹ  info      GET        http://127.0.0.1:4010/webhooks/corporis
+[5:44:45 PM] › [CLI] ℹ  info      PATCH      http://127.0.0.1:4010/webhooks/veritatis
+[5:44:45 PM] › [CLI] ℹ  info      DELETE     http://127.0.0.1:4010/webhooks/illo
+[5:44:45 PM] › [CLI] ℹ  info      GET        http://127.0.0.1:4010/webhooks/ab/deliveries?page=757&pageSize=100
+[5:44:45 PM] › [CLI] ℹ  info      POST       http://127.0.0.1:4010/webhooks/voluptatem/test
+[5:44:45 PM] › [CLI] ℹ  info      POST       http://127.0.0.1:4010/webhooks/test-receiver
+[5:44:45 PM] › [CLI] ℹ  info      GET        http://127.0.0.1:4010/webhooks/test-receiver
+[5:44:45 PM] › [CLI] ℹ  info      DELETE     http://127.0.0.1:4010/webhooks/test-receiver
+[5:44:45 PM] › [CLI] ▶  start     Prism is listening on http://127.0.0.1:4010
+[5:44:46 PM] › [HTTP SERVER] get /workspaces ℹ  info      Request received
+[5:44:46 PM] ›     [NEGOTIATOR] ℹ  info      Request contains an accept header: */*
+[5:44:46 PM] ›     [VALIDATOR] ⚠  warning   Request did not pass the validation rules
+[5:44:46 PM] ›     [VALIDATOR] ✖  error     Invalid security scheme used
+[5:44:46 PM] › [HTTP SERVER] get /workspaces ✖  error     Request terminated with error: https://stoplight.io/prism/errors#UNAUTHORIZED: Invalid security scheme used
+[5:44:47 PM] › [HTTP SERVER] get /workspaces ℹ  info      Request received
+[5:44:47 PM] ›     [NEGOTIATOR] ℹ  info      Request contains an accept header: */*
+[5:44:47 PM] ›     [VALIDATOR] ⚠  warning   Request did not pass the validation rules
+[5:44:47 PM] ›     [VALIDATOR] ✖  error     Invalid security scheme used
+[5:44:47 PM] › [HTTP SERVER] get /workspaces ✖  error     Request terminated with error: https://stoplight.io/prism/errors#UNAUTHORIZED: Invalid security scheme used
+[5:44:48 PM] › [HTTP SERVER] get /workspaces ℹ  info      Request received
+[5:44:48 PM] ›     [NEGOTIATOR] ℹ  info      Request contains an accept header: */*
+[5:44:48 PM] ›     [VALIDATOR] ⚠  warning   Request did not pass the validation rules
+[5:44:48 PM] ›     [VALIDATOR] ✖  error     Invalid security scheme used
+[5:44:48 PM] › [HTTP SERVER] get /workspaces ✖  error     Request terminated with error: https://stoplight.io/prism/errors#UNAUTHORIZED: Invalid security scheme used
+[5:44:49 PM] › [HTTP SERVER] get /workspaces ℹ  info      Request received
+[5:44:49 PM] ›     [NEGOTIATOR] ℹ  info      Request contains an accept header: */*
+[5:44:49 PM] ›     [VALIDATOR] ⚠  warning   Request did not pass the validation rules
+[5:44:49 PM] ›     [VALIDATOR] ✖  error     Invalid security scheme used
+[5:44:49 PM] › [HTTP SERVER] get /workspaces ✖  error     Request terminated with error: https://stoplight.io/prism/errors#UNAUTHORIZED: Invalid security scheme used
+[5:44:50 PM] › [HTTP SERVER] get /workspaces ℹ  info      Request received
+[5:44:50 PM] ›     [NEGOTIATOR] ℹ  info      Request contains an accept header: */*
+[5:44:50 PM] ›     [VALIDATOR] ⚠  warning   Request did not pass the validation rules
+[5:44:50 PM] ›     [VALIDATOR] ✖  error     Invalid security scheme used
+[5:44:50 PM] › [HTTP SERVER] get /workspaces ✖  error     Request terminated with error: https://stoplight.io/prism/errors#UNAUTHORIZED: Invalid security scheme used
+[5:44:51 PM] › [HTTP SERVER] get /workspaces ℹ  info      Request received
+[5:44:51 PM] ›     [NEGOTIATOR] ℹ  info      Request contains an accept header: */*
+[5:44:51 PM] ›     [VALIDATOR] ⚠  warning   Request did not pass the validation rules
+[5:44:51 PM] ›     [VALIDATOR] ✖  error     Invalid security scheme used
+[5:44:51 PM] › [HTTP SERVER] get /workspaces ✖  error     Request terminated with error: https://stoplight.io/prism/errors#UNAUTHORIZED: Invalid security scheme used
+[5:44:52 PM] › [HTTP SERVER] get /workspaces ℹ  info      Request received
+[5:44:52 PM] ›     [NEGOTIATOR] ℹ  info      Request contains an accept header: */*
+[5:44:52 PM] ›     [VALIDATOR] ⚠  warning   Request did not pass the validation rules
+[5:44:52 PM] ›     [VALIDATOR] ✖  error     Invalid security scheme used
+[5:44:52 PM] › [HTTP SERVER] get /workspaces ✖  error     Request terminated with error: https://stoplight.io/prism/errors#UNAUTHORIZED: Invalid security scheme used
+[5:44:53 PM] › [HTTP SERVER] get /workspaces ℹ  info      Request received
+[5:44:53 PM] ›     [NEGOTIATOR] ℹ  info      Request contains an accept header: */*
+[5:44:53 PM] ›     [VALIDATOR] ⚠  warning   Request did not pass the validation rules
+[5:44:53 PM] ›     [VALIDATOR] ✖  error     Invalid security scheme used
+[5:44:53 PM] › [HTTP SERVER] get /workspaces ✖  error     Request terminated with error: https://stoplight.io/prism/errors#UNAUTHORIZED: Invalid security scheme used
+[5:44:54 PM] › [HTTP SERVER] get /workspaces ℹ  info      Request received
+[5:44:54 PM] ›     [NEGOTIATOR] ℹ  info      Request contains an accept header: */*
+[5:44:54 PM] ›     [VALIDATOR] ⚠  warning   Request did not pass the validation rules
+[5:44:54 PM] ›     [VALIDATOR] ✖  error     Invalid security scheme used
+[5:44:54 PM] › [HTTP SERVER] get /workspaces ✖  error     Request terminated with error: https://stoplight.io/prism/errors#UNAUTHORIZED: Invalid security scheme used
+[5:44:55 PM] › [HTTP SERVER] get /workspaces ℹ  info      Request received
+[5:44:55 PM] ›     [NEGOTIATOR] ℹ  info      Request contains an accept header: */*
+[5:44:55 PM] ›     [VALIDATOR] ⚠  warning   Request did not pass the validation rules
+[5:44:55 PM] ›     [VALIDATOR] ✖  error     Invalid security scheme used
+[5:44:55 PM] › [HTTP SERVER] get /workspaces ✖  error     Request terminated with error: https://stoplight.io/prism/errors#UNAUTHORIZED: Invalid security scheme used
+[5:44:56 PM] › [HTTP SERVER] get /workspaces ℹ  info      Request received
+[5:44:56 PM] ›     [NEGOTIATOR] ℹ  info      Request contains an accept header: */*
+[5:44:56 PM] ›     [VALIDATOR] ⚠  warning   Request did not pass the validation rules
+[5:44:56 PM] ›     [VALIDATOR] ✖  error     Invalid security scheme used
+[5:44:56 PM] › [HTTP SERVER] get /workspaces ✖  error     Request terminated with error: https://stoplight.io/prism/errors#UNAUTHORIZED: Invalid security scheme used
+[5:44:57 PM] › [HTTP SERVER] get /workspaces ℹ  info      Request received
+[5:44:57 PM] ›     [NEGOTIATOR] ℹ  info      Request contains an accept header: */*
+[5:44:57 PM] ›     [VALIDATOR] ⚠  warning   Request did not pass the validation rules
+[5:44:57 PM] ›     [VALIDATOR] ✖  error     Invalid security scheme used
+[5:44:57 PM] › [HTTP SERVER] get /workspaces ✖  error     Request terminated with error: https://stoplight.io/prism/errors#UNAUTHORIZED: Invalid security scheme used
+[5:44:58 PM] › [HTTP SERVER] get /workspaces ℹ  info      Request received
+[5:44:58 PM] ›     [NEGOTIATOR] ℹ  info      Request contains an accept header: */*
+[5:44:58 PM] ›     [VALIDATOR] ⚠  warning   Request did not pass the validation rules
+[5:44:58 PM] ›     [VALIDATOR] ✖  error     Invalid security scheme used
+[5:44:58 PM] › [HTTP SERVER] get /workspaces ✖  error     Request terminated with error: https://stoplight.io/prism/errors#UNAUTHORIZED: Invalid security scheme used
+[5:44:59 PM] › [HTTP SERVER] get /workspaces ℹ  info      Request received
+[5:44:59 PM] ›     [NEGOTIATOR] ℹ  info      Request contains an accept header: */*
+[5:44:59 PM] ›     [VALIDATOR] ⚠  warning   Request did not pass the validation rules
+[5:44:59 PM] ›     [VALIDATOR] ✖  error     Invalid security scheme used
+[5:44:59 PM] › [HTTP SERVER] get /workspaces ✖  error     Request terminated with error: https://stoplight.io/prism/errors#UNAUTHORIZED: Invalid security scheme used
+[5:45:00 PM] › [HTTP SERVER] get /workspaces ℹ  info      Request received
+[5:45:00 PM] ›     [NEGOTIATOR] ℹ  info      Request contains an accept header: */*
+[5:45:00 PM] ›     [VALIDATOR] ⚠  warning   Request did not pass the validation rules
+[5:45:00 PM] ›     [VALIDATOR] ✖  error     Invalid security scheme used
+[5:45:00 PM] › [HTTP SERVER] get /workspaces ✖  error     Request terminated with error: https://stoplight.io/prism/errors#UNAUTHORIZED: Invalid security scheme used
+[5:45:01 PM] › [HTTP SERVER] get /workspaces ℹ  info      Request received
+[5:45:01 PM] ›     [NEGOTIATOR] ℹ  info      Request contains an accept header: */*
+[5:45:01 PM] ›     [VALIDATOR] ⚠  warning   Request did not pass the validation rules
+[5:45:01 PM] ›     [VALIDATOR] ✖  error     Invalid security scheme used
+[5:45:01 PM] › [HTTP SERVER] get /workspaces ✖  error     Request terminated with error: https://stoplight.io/prism/errors#UNAUTHORIZED: Invalid security scheme used
+[5:45:02 PM] › [HTTP SERVER] get /workspaces ℹ  info      Request received
+[5:45:02 PM] ›     [NEGOTIATOR] ℹ  info      Request contains an accept header: */*
+[5:45:02 PM] ›     [VALIDATOR] ⚠  warning   Request did not pass the validation rules
+[5:45:02 PM] ›     [VALIDATOR] ✖  error     Invalid security scheme used
+[5:45:02 PM] › [HTTP SERVER] get /workspaces ✖  error     Request terminated with error: https://stoplight.io/prism/errors#UNAUTHORIZED: Invalid security scheme used
+[5:45:03 PM] › [HTTP SERVER] get /workspaces ℹ  info      Request received
+[5:45:03 PM] ›     [NEGOTIATOR] ℹ  info      Request contains an accept header: */*
+[5:45:03 PM] ›     [VALIDATOR] ⚠  warning   Request did not pass the validation rules
+[5:45:03 PM] ›     [VALIDATOR] ✖  error     Invalid security scheme used
+[5:45:03 PM] › [HTTP SERVER] get /workspaces ✖  error     Request terminated with error: https://stoplight.io/prism/errors#UNAUTHORIZED: Invalid security scheme used
+[5:45:04 PM] › [HTTP SERVER] get /workspaces ℹ  info      Request received
+[5:45:04 PM] ›     [NEGOTIATOR] ℹ  info      Request contains an accept header: */*
+[5:45:04 PM] ›     [VALIDATOR] ⚠  warning   Request did not pass the validation rules
+[5:45:04 PM] ›     [VALIDATOR] ✖  error     Invalid security scheme used
+[5:45:04 PM] › [HTTP SERVER] get /workspaces ✖  error     Request terminated with error: https://stoplight.io/prism/errors#UNAUTHORIZED: Invalid security scheme used
+[5:45:05 PM] › [HTTP SERVER] get /workspaces ℹ  info      Request received
+[5:45:05 PM] ›     [NEGOTIATOR] ℹ  info      Request contains an accept header: */*
+[5:45:05 PM] ›     [VALIDATOR] ⚠  warning   Request did not pass the validation rules
+[5:45:05 PM] ›     [VALIDATOR] ✖  error     Invalid security scheme used
+[5:45:05 PM] › [HTTP SERVER] get /workspaces ✖  error     Request terminated with error: https://stoplight.io/prism/errors#UNAUTHORIZED: Invalid security scheme used
+[5:45:09 PM] › [HTTP SERVER] get /workspaces ℹ  info      Request received
+[5:45:09 PM] ›     [VALIDATOR] ✔  success   The request passed the validation rules. Looking for the best response
+[5:45:09 PM] ›     [NEGOTIATOR] ✔  success   Responding with the requested status code 200
+[5:45:09 PM] ›     [NEGOTIATOR] ℹ  info      > Responding with "200"
+[5:45:09 PM] › [HTTP SERVER] get /user/plan ℹ  info      Request received
+[5:45:09 PM] ›     [VALIDATOR] ✔  success   The request passed the validation rules. Looking for the best response
+[5:45:09 PM] ›     [NEGOTIATOR] ✔  success   Responding with the requested status code 200
+[5:45:09 PM] ›     [NEGOTIATOR] ℹ  info      > Responding with "200"
