@@ -2,10 +2,13 @@ package tracore
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -164,6 +167,98 @@ func TestExtractAsyncRequiresInput(t *testing.T) {
 	te, ok := AsTracoreError(err)
 	if !ok || te.Code != ErrCodeConfig {
 		t.Fatalf("want config_error, got %v", err)
+	}
+}
+
+var inlineSchema = map[string]any{
+	"type":       "object",
+	"properties": map[string]any{"total": map[string]any{"type": "number"}},
+}
+
+// captureExtract starts a server that records the extract request and answers 202.
+func captureExtract(t *testing.T, inspect func(r *http.Request)) *Client {
+	t.Helper()
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		inspect(r)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusAccepted)
+		_, _ = w.Write([]byte(`{"runId":"run_123","status":"pending"}`))
+	}))
+	t.Cleanup(srv.Close)
+	c, err := New(ClientOptions{APIKey: "k", BaseURL: srv.URL})
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	return c
+}
+
+func TestExtractUploadSendsInlineSchemaBeforeFile(t *testing.T) {
+	var parts []string
+	got := map[string]string{}
+	c := captureExtract(t, func(r *http.Request) {
+		mr, err := r.MultipartReader()
+		if err != nil {
+			t.Errorf("MultipartReader: %v", err)
+			return
+		}
+		for {
+			p, err := mr.NextPart()
+			if err == io.EOF {
+				break
+			}
+			if err != nil {
+				t.Errorf("NextPart: %v", err)
+				return
+			}
+			b, _ := io.ReadAll(p)
+			parts = append(parts, p.FormName())
+			got[p.FormName()] = string(b)
+		}
+	})
+
+	_, err := c.ExtractAsync(context.Background(), "ws", "invoice",
+		ExtractInput{File: strings.NewReader("%PDF-1.4"), FileName: "invoice.pdf"},
+		&ExtractOptions{Schema: inlineSchema, SchemaName: "Invoice", Description: "Supplier invoices"})
+	if err != nil {
+		t.Fatalf("ExtractAsync: %v", err)
+	}
+
+	if len(parts) == 0 || parts[len(parts)-1] != "file" {
+		t.Fatalf("file must be the last part, got order %v", parts)
+	}
+	var schema map[string]any
+	if err := json.Unmarshal([]byte(got["schema"]), &schema); err != nil {
+		t.Fatalf("schema field is not JSON: %q", got["schema"])
+	}
+	if !reflect.DeepEqual(schema, inlineSchema) {
+		t.Fatalf("schema = %v, want %v", schema, inlineSchema)
+	}
+	if got["schemaName"] != "Invoice" || got["description"] != "Supplier invoices" || got["name"] != "invoice.pdf" {
+		t.Fatalf("unexpected fields: %v", got)
+	}
+	if got["file"] != "%PDF-1.4" {
+		t.Fatalf("file = %q", got["file"])
+	}
+}
+
+func TestExtractByDocumentIDSendsInlineSchema(t *testing.T) {
+	var body map[string]any
+	c := captureExtract(t, func(r *http.Request) {
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			t.Errorf("decode body: %v", err)
+		}
+	})
+
+	_, err := c.ExtractAsync(context.Background(), "ws", "invoice",
+		ExtractInput{DocumentID: "doc_1"},
+		&ExtractOptions{Schema: inlineSchema, SchemaName: "Invoice", Description: "Supplier invoices"})
+	if err != nil {
+		t.Fatalf("ExtractAsync: %v", err)
+	}
+
+	want := map[string]any{"schema": inlineSchema, "schemaName": "Invoice", "description": "Supplier invoices"}
+	if !reflect.DeepEqual(body, want) {
+		t.Fatalf("body = %v, want %v", body, want)
 	}
 }
 
