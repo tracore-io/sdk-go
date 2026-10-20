@@ -14,6 +14,7 @@ package tracore
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -141,8 +142,18 @@ type ExtractInput struct {
 type ExtractOptions struct {
 	// Env overrides the client's default environment.
 	Env Env
-	// VersionNumber pins a schema version. 0 uses the latest.
+	// VersionNumber pins a schema version. 0 uses the latest. Ignored when Schema
+	// is set.
 	VersionNumber int
+	// Schema is an inline JSON Schema to extract with. On first use the schema
+	// family is created under schemaKey; afterwards a new version is created only
+	// if the schema's hash differs from the latest one.
+	Schema map[string]any
+	// SchemaName is the schema family's display name when Schema creates it.
+	// Empty defaults to schemaKey.
+	SchemaName string
+	// Description is the schema family's description when Schema creates it.
+	Description string
 	// Model is an optional `<provider>/<model>` override for this run.
 	Model string
 	// Poll, when true, blocks until the run reaches a terminal status.
@@ -210,6 +221,15 @@ func (c *Client) startExtract(ctx context.Context, workspace, schemaKey string, 
 		if o.VersionNumber != 0 {
 			body.VersionNumber = &o.VersionNumber
 		}
+		if o.Schema != nil {
+			body.Schema = &o.Schema
+		}
+		if o.SchemaName != "" {
+			body.SchemaName = &o.SchemaName
+		}
+		if o.Description != "" {
+			body.Description = &o.Description
+		}
 		if o.Model != "" {
 			body.Model = &o.Model
 		}
@@ -223,6 +243,19 @@ func (c *Client) startExtract(ctx context.Context, workspace, schemaKey string, 
 		fields := map[string]string{}
 		if o.VersionNumber != 0 {
 			fields["versionNumber"] = strconv.Itoa(o.VersionNumber)
+		}
+		if o.Schema != nil {
+			schema, err := json.Marshal(o.Schema)
+			if err != nil {
+				return nil, &TracoreError{Code: ErrCodeConfig, Message: "Schema is not JSON-serializable", cause: err}
+			}
+			fields["schema"] = string(schema)
+		}
+		if o.SchemaName != "" {
+			fields["schemaName"] = o.SchemaName
+		}
+		if o.Description != "" {
+			fields["description"] = o.Description
 		}
 		if o.Model != "" {
 			fields["model"] = o.Model
@@ -244,6 +277,7 @@ func (c *Client) startExtract(ctx context.Context, workspace, schemaKey string, 
 
 // multipartBody builds a multipart/form-data body with a single "file" part plus
 // a "name" field and any extra string fields. Returned alongside its content type.
+// The API reads fields only up to the file part, so every field is written first.
 func multipartBody(file io.Reader, name string, fields map[string]string) (io.Reader, string, error) {
 	var buf bytes.Buffer
 	w := multipart.NewWriter(&buf)

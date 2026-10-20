@@ -75,6 +75,28 @@ func main() {
 }
 ```
 
+### Inline schema
+
+Skip the separate `Schemas.Create` call by passing the schema to `Extract`. The
+schema family is created on first use; later calls create a new version only when
+the schema changes.
+
+```go
+run, err := client.Extract(ctx, "my-workspace", "invoice",
+	tracore.ExtractInput{File: f, FileName: "invoice.pdf"},
+	&tracore.ExtractOptions{
+		SchemaName: "Invoice",
+		Schema: map[string]any{
+			"type": "object",
+			"properties": map[string]any{
+				"invoiceNumber": map[string]any{"type": "string"},
+				"total":         map[string]any{"type": "number"},
+			},
+		},
+		Poll: true,
+	})
+```
+
 ## Resources
 
 - `client.Workspaces` — manage workspaces

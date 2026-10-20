@@ -4,6 +4,16 @@ All notable changes to the Tracore Go SDK are documented here. The format follow
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); this SDK follows SemVer.
 Each entry notes the Tracore API contract version (`api-vX.Y.Z`) it was built from.
 
+## 0.3.0 — api-v0.6.0
+
+### Added
+
+- `ExtractOptions.Schema`, `SchemaName`, `Description`: pass a JSON Schema inline to
+  `Client.Extract` / `Client.ExtractAsync`. The API creates the schema family on
+  first use and versions it by hash afterwards. Works for both `File`+`FileName`
+  and `DocumentID` inputs. The API always accepted these fields; the SDK never
+  exposed them, although the docs quickstart used them.
+
 ## 0.2.0 — api-v0.6.0
 
 ### Added
