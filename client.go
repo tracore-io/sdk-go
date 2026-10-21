@@ -146,13 +146,16 @@ type ExtractOptions struct {
 	// is set.
 	VersionNumber int
 	// Schema is an inline JSON Schema to extract with. On first use the schema
-	// family is created under schemaKey; afterwards a new version is created only
-	// if the schema's hash differs from the latest one.
+	// family is created under schemaKey. Afterwards a schema matching any earlier
+	// version (by canonical hash) reuses that version without changing the latest
+	// one; only a schema not seen before creates a new latest version. Send it on
+	// every call to run different schemas per environment under one key.
 	Schema map[string]any
-	// SchemaName is the schema family's display name when Schema creates it.
-	// Empty defaults to schemaKey.
+	// SchemaName is the schema family's display name. Set, it updates the stored
+	// name; empty keeps it. A family created without it is named after schemaKey.
 	SchemaName string
-	// Description is the schema family's description when Schema creates it.
+	// Description is the schema family's description. Set, it updates the stored
+	// one; empty keeps it.
 	Description string
 	// Model is an optional `<provider>/<model>` override for this run.
 	Model string
