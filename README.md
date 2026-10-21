@@ -78,8 +78,9 @@ func main() {
 ### Inline schema
 
 Skip the separate `Schemas.Create` call by passing the schema to `Extract`. The
-schema family is created on first use; later calls create a new version only when
-the schema changes.
+schema family is created on first use. Later calls reuse the version of any schema
+sent before and create a new version only for a schema not seen yet, so each
+environment can send its own schema under the same key.
 
 ```go
 run, err := client.Extract(ctx, "my-workspace", "invoice",
