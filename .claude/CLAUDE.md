@@ -43,3 +43,7 @@ regenerates and opens a draft `needs-polish` PR; the `polish-sdk-pr` skill finis
 it locally; a human merges; `publish.yml` tags `vX.Y.Z`. Full runbook:
 `docs/releasing-sdks.md` in the monorepo. The `polish-sdk-pr` skill here is synced
 read-only from the monorepo — never hand-edit it.
+
+## Dependency updates (Renovate)
+
+Self-hosted from `.github/workflows/renovate.yml` (daily 03:00 UTC; needs the `RENOVATE_TOKEN` secret). `renovate.json`: minor/patch ride in `all non-major updates`, every major gets its own PR with import paths rewritten (`gomodUpdateImportPaths`), nothing automerges (`main` requires an approving review). `oapi-codegen` and `oapi-codegen/runtime` share one `codegen` PR: check out the branch, run `go generate ./...` and commit `internal/generated/` before merging. The `go` directive and the `go-version` in workflows are the support floor and Renovate never touches them; raising them is a breaking change for consumers. Validate config changes with `npx --yes --package renovate -- renovate-config-validator`, and check grouping with `GITHUB_COM_TOKEN=$(gh auth token) RENOVATE_TOKEN=$(gh auth token) npx --yes renovate --platform=local --dry-run=lookup` after committing (the local platform only reads tracked files).
