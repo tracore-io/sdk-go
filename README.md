@@ -147,7 +147,10 @@ Error codes are exported as constants — the client-side synthetic codes
 (`tracore.ErrCodeTransport` for network/decoding failures with `Status == 0`,
 `tracore.ErrCodeConfig` for invalid client-side input, `tracore.ErrCodePollingTimeout`
 for an exhausted poll loop) plus the server's `error.code` vocabulary
-(`tracore.ErrCodeNotFound`, `tracore.ErrCodePlanLimitExceeded`, ...). Transport
+(`tracore.ErrCodeNotFound`, `tracore.ErrCodePlanLimitExceeded`, ...). A rejected
+API key arrives as `401` with `tracore.ErrCodeInvalidAPIKey`,
+`tracore.ErrCodeAPIKeyDisabled` or `tracore.ErrCodeAPIKeyExpired`;
+`tracore.ErrCodeUnauthorized` means no credentials were sent. Transport
 failures keep their underlying
 cause reachable through `errors.Is`/`errors.As` (`Unwrap`), so checks like
 `errors.Is(err, context.Canceled)` or `net.Error` timeout detection work through

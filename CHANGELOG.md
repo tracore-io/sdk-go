@@ -4,6 +4,24 @@ All notable changes to the Tracore Go SDK are documented here. The format follow
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); this SDK follows SemVer.
 Each entry notes the Tracore API contract version (`api-vX.Y.Z`) it was built from.
 
+## 0.4.0 — api-v0.7.0
+
+### Added
+
+- `ErrCodeInvalidAPIKey`, `ErrCodeAPIKeyDisabled`, `ErrCodeAPIKeyExpired`: the API
+  now reports why an API key was rejected. These 401s previously arrived as
+  `ErrCodeUnauthorized`, which is now used only when no credentials were sent.
+  Code that treats every 401 as an auth failure keeps working; code that compares
+  `te.Code == tracore.ErrCodeUnauthorized` for a bad key should check the new
+  constants as well.
+
+### Changed
+
+- The API no longer applies a per-key limit of 10 requests per 24 hours, so
+  server-to-server callers stop receiving 401 after their tenth call. Rate-limit
+  responses are `429` with `ErrCodeRateLimited` and a `Retry-After` header when
+  the wait is known.
+
 ## 0.3.1 — api-v0.6.0
 
 ### Changed

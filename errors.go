@@ -23,13 +23,19 @@ const (
 // schema. The wire field stays a free-form string — new codes are not a breaking
 // change — so match on these constants rather than an exhaustive switch.
 // Note: key-validation failures arrive as ErrCodeValidation with
-// `Details["code"] == "invalid_key"`, not as a top-level code. The last five
+// `Details["code"] == "invalid_key"`, not as a top-level code. ErrCodeUnauthorized
+// means no credentials were sent; a rejected API key is ErrCodeInvalidAPIKey,
+// ErrCodeAPIKeyDisabled or ErrCodeAPIKeyExpired (all 401). ErrCodeRateLimited
+// (429) carries a Retry-After header in seconds when the wait is known. The last five
 // constants surface only on internal billing surfaces and the Stripe webhook,
 // never on public API endpoints.
 const (
 	ErrCodeNotFound            = "NOT_FOUND"
 	ErrCodeValidation          = "VALIDATION_ERROR"
 	ErrCodeUnauthorized        = "UNAUTHORIZED"
+	ErrCodeInvalidAPIKey       = "invalid_api_key"
+	ErrCodeAPIKeyDisabled      = "api_key_disabled"
+	ErrCodeAPIKeyExpired       = "api_key_expired"
 	ErrCodeInternal            = "INTERNAL_ERROR"
 	ErrCodePlanLimitExceeded   = "plan_limit_exceeded"
 	ErrCodeRateLimited         = "rate_limited"
