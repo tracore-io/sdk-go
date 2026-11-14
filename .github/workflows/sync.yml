@@ -159,7 +159,7 @@ jobs:
       - name: Start Prism mock + test
         run: |
           set -euo pipefail
-          npx -y @stoplight/prism-cli@5 mock openapi.yaml -p 4010 > prism.log 2>&1 &
+          npx -y @stoplight/prism-cli@5 mock openapi.yaml -p 4010 > "$RUNNER_TEMP/prism.log" 2>&1 &
           for i in $(seq 1 30); do
             if curl -fsS -o /dev/null http://127.0.0.1:4010/workspaces; then break; fi
             sleep 1
