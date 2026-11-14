@@ -1,0 +1,38 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "labels": ["dependencies"],
+  "minimumReleaseAge": "7 days",
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 5am on tuesday"]
+  },
+  "postUpdateOptions": ["gomodTidy", "gomodUpdateImportPaths"],
+  "ignorePaths": ["**/vendor/**", "**/testdata/**"],
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "all non-major updates",
+      "labels": ["non-major"]
+    },
+    {
+      "description": "Majors are not grouped: each gets its own PR",
+      "matchUpdateTypes": ["major"],
+      "labels": ["major", "needs-manual-review"]
+    },
+    {
+      "description": "The generated client imports oapi-codegen/runtime at the version the generator expects, and a generator bump changes internal/generated/, so the PR must also carry go generate output",
+      "matchPackageNames": [
+        "github.com/oapi-codegen/oapi-codegen/v2",
+        "github.com/oapi-codegen/runtime"
+      ],
+      "groupName": "codegen",
+      "labels": ["codegen", "needs-manual-review"]
+    },
+    {
+      "description": "The go directive and the go-version in CI are the oldest Go the SDK supports; raising them is a breaking change for consumers, made by hand",
+      "matchDepNames": ["go"],
+      "enabled": false
+    }
+  ]
+}
