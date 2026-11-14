@@ -24,10 +24,13 @@ const (
 
 // Defines values for ApiErrorCode.
 const (
+	ApiErrorCodeApiKeyDisabled      ApiErrorCode = "api_key_disabled"
+	ApiErrorCodeApiKeyExpired       ApiErrorCode = "api_key_expired"
 	ApiErrorCodeCheckoutMissingUser ApiErrorCode = "checkout_missing_user"
 	ApiErrorCodeEmailNotVerified    ApiErrorCode = "email_not_verified"
 	ApiErrorCodeForbiddenKey        ApiErrorCode = "forbidden_key"
 	ApiErrorCodeINTERNALERROR       ApiErrorCode = "INTERNAL_ERROR"
+	ApiErrorCodeInvalidApiKey       ApiErrorCode = "invalid_api_key"
 	ApiErrorCodeInvalidModel        ApiErrorCode = "invalid_model"
 	ApiErrorCodeInvalidProvider     ApiErrorCode = "invalid_provider"
 	ApiErrorCodeInvalidSignature    ApiErrorCode = "invalid_signature"
@@ -45,6 +48,10 @@ const (
 // Valid indicates whether the value is a known member of the ApiErrorCode enum.
 func (e ApiErrorCode) Valid() bool {
 	switch e {
+	case ApiErrorCodeApiKeyDisabled:
+		return true
+	case ApiErrorCodeApiKeyExpired:
+		return true
 	case ApiErrorCodeCheckoutMissingUser:
 		return true
 	case ApiErrorCodeEmailNotVerified:
@@ -52,6 +59,8 @@ func (e ApiErrorCode) Valid() bool {
 	case ApiErrorCodeForbiddenKey:
 		return true
 	case ApiErrorCodeINTERNALERROR:
+		return true
+	case ApiErrorCodeInvalidApiKey:
 		return true
 	case ApiErrorCodeInvalidModel:
 		return true
@@ -760,7 +769,7 @@ func (e CreateWebhookParamsEnv) Valid() bool {
 	}
 }
 
-// ApiErrorCode Known top-level `error.code` vocabulary emitted by the API. Deliberately NOT wired into `ErrorResponse.error.code` (which stays free-form for forward compatibility) — this standalone enum exists so generated SDKs carry the constants and consumers never restate them by hand. SDKs additionally synthesize client-side codes for failures that never reached the API: `transport_error` (network/decoding failure) and `config_error` (invalid client-side input). Notes: `stripe_not_configured`, `no_stripe_customer`, `email_not_verified`, and `checkout_missing_user` surface only on internal billing endpoints; `invalid_signature` only on the Stripe-facing `/billing/webhook`. `invalid_key` is NOT a top-level code — key-validation failures arrive as `VALIDATION_ERROR` with `details.code = "invalid_key"`.
+// ApiErrorCode Known top-level `error.code` vocabulary emitted by the API. Deliberately NOT wired into `ErrorResponse.error.code` (which stays free-form for forward compatibility) — this standalone enum exists so generated SDKs carry the constants and consumers never restate them by hand. SDKs additionally synthesize client-side codes for failures that never reached the API: `transport_error` (network/decoding failure) and `config_error` (invalid client-side input). Notes: `stripe_not_configured`, `no_stripe_customer`, `email_not_verified`, and `checkout_missing_user` surface only on internal billing endpoints; `invalid_signature` only on the Stripe-facing `/billing/webhook`. `invalid_key` is NOT a top-level code — key-validation failures arrive as `VALIDATION_ERROR` with `details.code = "invalid_key"`. API-key authentication failures use `invalid_api_key` / `api_key_disabled` / `api_key_expired` (401); requests without any credentials stay `UNAUTHORIZED`.
 type ApiErrorCode string
 
 // AuthSession defines model for AuthSession.
