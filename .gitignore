@@ -10,3 +10,5 @@
 *.test
 
 .idea
+# Prism mock-server log written by the contract-test step in ci.yml.
+prism.log
